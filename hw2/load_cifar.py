@@ -69,10 +69,10 @@ def preprocess_data(folder_path):
 
     # min max normalization
     scaler = MinMaxScaler()
-    scaler.fit_transform(vali_features)
+    vali_features = scaler.fit_transform(vali_features)
     #print(scaler.data_max_)
-    scaler.transform(train_features)
-    scaler.transform(test_features)
+    train_features = scaler.transform(train_features)
+    test_features = scaler.transform(test_features)
     
     print(train_labels.shape)
 
