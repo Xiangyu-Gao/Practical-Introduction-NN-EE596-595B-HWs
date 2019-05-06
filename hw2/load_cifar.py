@@ -26,7 +26,7 @@ def load_testing_batch(folder):
     return dict
 
 def features_reshape(feature):
-    feature = np.reshape(feature, (10000,32,32,3), order='F')
+    feature = np.reshape(feature, (-1,32,32,3), order='F')
 
     return feature
 
