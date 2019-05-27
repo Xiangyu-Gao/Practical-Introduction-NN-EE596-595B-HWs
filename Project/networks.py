@@ -2,6 +2,7 @@ import tensorflow as tf
 import numpy as np
 from tensorflow.contrib.layers import flatten
 
+num_classes = 3
 
 def VGG_like(x):    
     #first conv/pool pair

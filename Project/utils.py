@@ -1,3 +1,14 @@
+import pickle
+import numpy as np
+import timeit
+import scipy.io as spio
+import os
+import cv2
+import matplotlib.pyplot as plt
+import time
+from tqdm import tqdm
+
+
 def fetch_data(directory, label): 
     item_list = []
     step = 0
@@ -7,7 +18,7 @@ def fetch_data(directory, label):
 
         mat = spio.loadmat(full_img_str, squeeze_me=True)
         data = np.abs(mat["data_store"])
-        smaller_data = data[200:300]
+        smaller_data = data[70:170]
         #print(data.shape)
         #print(data)
         ###append the img and label to the list###
