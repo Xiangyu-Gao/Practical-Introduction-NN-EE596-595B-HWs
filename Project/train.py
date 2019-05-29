@@ -18,7 +18,7 @@ tf.reset_default_graph()
 #learning rate
 lr = 0.00001
 #number of traning steps
-num_steps = 80
+num_steps = 40
 #batch_size
 batch_size = 10
 #num_input = 784
@@ -132,7 +132,7 @@ keep_prob = tf.placeholder(tf.float32, name='keep_prob')
 
 
 #predicted labels
-logits = VGG_like(X, keep_prob)
+logits = VGG16(X, keep_prob)
 
 #define loss
 loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits_v2(logits=logits,labels=Y),name='loss')

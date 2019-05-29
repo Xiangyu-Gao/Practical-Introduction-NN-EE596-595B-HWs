@@ -66,7 +66,7 @@ def VGG_like(x, keep_prob):
 #     logits = tf.contrib.layers.fully_connected(inputs=drop4, num_outputs=num_classes, activation_fn=None, weights_regularizer = regularizer)
 #     return logits
 
-def VGG16(x):    
+def VGG16(x, keep_prob):    
     #first conv/pool pair
     #filters, then kernel size
     conv1 = tf.layers.conv2d(x, 64, 3, activation=tf.nn.relu, padding = "same")
