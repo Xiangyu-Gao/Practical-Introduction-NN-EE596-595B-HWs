@@ -18,7 +18,8 @@ def fetch_data(directory, label):
 
         mat = spio.loadmat(full_img_str, squeeze_me=True)
         data = np.abs(mat["data_store"])
-        smaller_data = data[70:170]
+        smaller_data = data
+        # smaller_data = data[70:170]
         #print(data.shape)
         #print(data)
         ###append the img and label to the list###

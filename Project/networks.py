@@ -4,26 +4,67 @@ from tensorflow.contrib.layers import flatten
 
 num_classes = 3
 
-def VGG_like(x):    
+def VGG_like(x, keep_prob):    
     #first conv/pool pair
     #filters, then kernel size
-    conv1 = tf.layers.conv2d(x, 30, 5, activation=tf.nn.relu)
+    regularizer = tf.contrib.layers.l2_regularizer(scale=0.1)
+
+    conv1 = tf.layers.conv2d(x, 32, 3, activation=tf.nn.relu, kernel_regularizer= regularizer, \
+        kernel_initializer=tf.contrib.layers.xavier_initializer())
     #pool size, then stride
     pool1 = tf.layers.max_pooling2d(conv1, 2, 2)
     
     #second conv/pool pair
-    conv2 = tf.layers.conv2d(pool1, 15, 3, activation=tf.nn.relu)
+    conv2 = tf.layers.conv2d(pool1, 64, 3, activation=tf.nn.relu, kernel_regularizer = regularizer, 
+        kernel_initializer=tf.contrib.layers.xavier_initializer())
     pool2 = tf.layers.max_pooling2d(conv2, 2, 2)
-    drop2 = tf.nn.dropout(pool2, 0.8)
+    #drop2 = tf.nn.dropout(pool2, 0.95)
+
+    #third conv/pool pair
+    conv3 = tf.layers.conv2d(pool2, 128, 3, activation=tf.nn.relu, kernel_regularizer = regularizer, \
+        kernel_initializer=tf.contrib.layers.xavier_initializer())
+    pool3 = tf.layers.max_pooling2d(conv3, 2, 2)
+    drop3 = tf.nn.dropout(pool3, keep_prob = keep_prob)
     
+   
     #flatten to connect to fully connected
-    full_in = flatten(drop2)
+    full_in = flatten(drop3)
     
     #fully connected layer
-    full1 = tf.contrib.layers.fully_connected(inputs=full_in, num_outputs=128, activation_fn=tf.nn.relu)
-    full2 = tf.contrib.layers.fully_connected(inputs=full1, num_outputs=50, activation_fn=tf.nn.relu)
-    logits = tf.contrib.layers.fully_connected(inputs=full2, num_outputs=num_classes, activation_fn=None)
+    full1 = tf.contrib.layers.fully_connected(inputs=full_in, num_outputs=1024, activation_fn=tf.nn.relu, \
+        weights_regularizer = regularizer)
+    drop4 = tf.nn.dropout(full1, keep_prob = keep_prob)
+    full2 = tf.contrib.layers.fully_connected(inputs=drop4, num_outputs=256, activation_fn=tf.nn.relu, \
+        weights_regularizer = regularizer)
+    drop5 = tf.nn.dropout(full2, keep_prob = keep_prob)
+    logits = tf.contrib.layers.fully_connected(inputs=drop5, num_outputs=num_classes, activation_fn=None, \
+        weights_regularizer = regularizer)
     return logits
+
+# def VGG_like(x):    
+
+#     regularizer = tf.contrib.layers.l2_regularizer(scale=0.1)
+#     #first conv/pool pair
+#     #filters, then kernel size
+#     conv1 = tf.layers.conv2d(x, 30, 5, activation=tf.nn.relu)
+#     #pool size, then stride
+#     pool1 = tf.layers.max_pooling2d(conv1, 2, 2)
+    
+#     #second conv/pool pair
+#     conv2 = tf.layers.conv2d(pool1, 15, 3, activation=tf.nn.relu)
+#     pool2 = tf.layers.max_pooling2d(conv2, 2, 2)
+#     drop2 = tf.nn.dropout(pool2, 0.95)
+    
+#     #flatten to connect to fully connected
+#     full_in = flatten(drop2)
+    
+#     #fully connected layer
+#     full1 = tf.contrib.layers.fully_connected(inputs=full_in, num_outputs=128, activation_fn=tf.nn.relu, weights_regularizer = regularizer)
+#     drop3 = tf.nn.dropout(full1, 0.95)
+#     full2 = tf.contrib.layers.fully_connected(inputs=drop3, num_outputs=50, activation_fn=tf.nn.relu, weights_regularizer = regularizer)
+#     drop4 = tf.nn.dropout(full2, 0.95)
+#     logits = tf.contrib.layers.fully_connected(inputs=drop4, num_outputs=num_classes, activation_fn=None, weights_regularizer = regularizer)
+#     return logits
 
 def VGG16(x):    
     #first conv/pool pair
@@ -77,18 +118,21 @@ def ResNet50(x):
     #first conv/pool pair
     #filters, then kernel size
     #first layer
-    conv1 = tf.layers.conv2d(x, 64, 7, activation=tf.nn.relu, padding = "same")
+
+    regularizer = tf.contrib.layers.l2_regularizer(scale=0.1)
+
+    conv1 = tf.layers.conv2d(x, 64, 7, activation=tf.nn.relu, padding = "same", kernel_regularizer=regularizer)
     pool1 = tf.layers.max_pooling2d(conv1, 2, 2) #did 2 not 3
     
     #repeat x3
     #second layer with shortcuts
-    shortcut2 = tf.layers.conv2d(pool1, 256, 1, activation=tf.nn.relu, padding = "same")
+    shortcut2 = tf.layers.conv2d(pool1, 256, 1, activation=tf.nn.relu, padding = "same", kernel_regularizer=regularizer)
     conv2 = pool1
     for i in range(3):
         #filters, then kernel size
-        conv2 = tf.layers.conv2d(conv2, 64, 1, activation=tf.nn.relu, padding = "same")
-        conv2 = tf.layers.conv2d(conv2, 64, 3, activation=tf.nn.relu, padding = "same")
-        conv2 = tf.layers.conv2d(conv2, 256, 1, activation=None, padding = "same")
+        conv2 = tf.layers.conv2d(conv2, 64, 1, activation=tf.nn.relu, padding = "same", kernel_regularizer=regularizer)
+        conv2 = tf.layers.conv2d(conv2, 64, 3, activation=tf.nn.relu, padding = "same", kernel_regularizer=regularizer)
+        conv2 = tf.layers.conv2d(conv2, 256, 1, activation=None, padding = "same", kernel_regularizer=regularizer)
         
         conv2 = shortcut2 + conv2
         conv2 = tf.nn.relu(conv2)
@@ -98,10 +142,10 @@ def ResNet50(x):
     
     #lose weight at the start of layers, first shortcut needs to be reshaped
     #filter, kernel, then stride
-    shortcut3 = tf.layers.conv2d(conv2, 512, 1, 2, activation=tf.nn.relu) #changed filters
-    conv3 = tf.layers.conv2d(conv2, 128, 1, 2, activation=tf.nn.relu) #need stride 2
-    conv3 = tf.layers.conv2d(conv3, 128, 3, activation=tf.nn.relu, padding = "same")
-    conv3 = tf.layers.conv2d(conv3, 512, 1, activation=None, padding = "same")
+    shortcut3 = tf.layers.conv2d(conv2, 512, 1, 2, activation=tf.nn.relu, kernel_regularizer=regularizer) #changed filters
+    conv3 = tf.layers.conv2d(conv2, 128, 1, 2, activation=tf.nn.relu, kernel_regularizer=regularizer) #need stride 2
+    conv3 = tf.layers.conv2d(conv3, 128, 3, activation=tf.nn.relu, padding = "same", kernel_regularizer=regularizer)
+    conv3 = tf.layers.conv2d(conv3, 512, 1, activation=None, padding = "same", kernel_regularizer=regularizer)
     conv3 = conv3 + shortcut3
     conv3 = tf.nn.relu(conv3)
     
@@ -110,9 +154,9 @@ def ResNet50(x):
     #third layer with shortcuts
     for i in range(3):
         #filters, then kernel size
-        conv3 = tf.layers.conv2d(conv3, 128, 1, activation=tf.nn.relu, padding = "same")
-        conv3 = tf.layers.conv2d(conv3, 128, 3, activation=tf.nn.relu, padding = "same")
-        conv3 = tf.layers.conv2d(conv3, 512, 1, activation=None, padding = "same")
+        conv3 = tf.layers.conv2d(conv3, 128, 1, activation=tf.nn.relu, padding = "same", kernel_regularizer=regularizer)
+        conv3 = tf.layers.conv2d(conv3, 128, 3, activation=tf.nn.relu, padding = "same", kernel_regularizer=regularizer)
+        conv3 = tf.layers.conv2d(conv3, 512, 1, activation=None, padding = "same", kernel_regularizer=regularizer)
         
         conv3 = shortcut3 + conv3
         conv3 = tf.nn.relu(conv3)
@@ -121,10 +165,10 @@ def ResNet50(x):
     
     #lose weight at the start of layers, first shortcut needs to be reshaped
     #filter, kernel, then stride
-    shortcut4 = tf.layers.conv2d(conv3, 1024, 1, 2, activation=tf.nn.relu)
-    conv4 = tf.layers.conv2d(conv3, 256, 1, 2, activation=tf.nn.relu) #need stride 2
-    conv4 = tf.layers.conv2d(conv4, 256, 3, activation=tf.nn.relu, padding = "same")
-    conv4 = tf.layers.conv2d(conv4, 1024, 1, activation=None, padding = "same")
+    shortcut4 = tf.layers.conv2d(conv3, 1024, 1, 2, activation=tf.nn.relu, kernel_regularizer=regularizer)
+    conv4 = tf.layers.conv2d(conv3, 256, 1, 2, activation=tf.nn.relu, kernel_regularizer=regularizer) #need stride 2
+    conv4 = tf.layers.conv2d(conv4, 256, 3, activation=tf.nn.relu, padding = "same", kernel_regularizer=regularizer)
+    conv4 = tf.layers.conv2d(conv4, 1024, 1, activation=None, padding = "same", kernel_regularizer=regularizer)
     conv4 = conv4 + shortcut4
     conv4 = tf.nn.relu(conv4)
     
@@ -133,9 +177,9 @@ def ResNet50(x):
     #fourth layer with shortcuts
     for i in range(5):
         #filters, then kernel size
-        conv4 = tf.layers.conv2d(conv4, 256, 1, activation=tf.nn.relu, padding = "same")
-        conv4 = tf.layers.conv2d(conv4, 256, 3, activation=tf.nn.relu, padding = "same")
-        conv4 = tf.layers.conv2d(conv4, 1024, 1, activation=None, padding = "same")
+        conv4 = tf.layers.conv2d(conv4, 256, 1, activation=tf.nn.relu, padding = "same", kernel_regularizer=regularizer)
+        conv4 = tf.layers.conv2d(conv4, 256, 3, activation=tf.nn.relu, padding = "same", kernel_regularizer=regularizer)
+        conv4 = tf.layers.conv2d(conv4, 1024, 1, activation=None, padding = "same", kernel_regularizer=regularizer)
         
         conv4 = shortcut4 + conv4
         conv4 = tf.nn.relu(conv4)
@@ -143,10 +187,10 @@ def ResNet50(x):
     
     #lose weight at the start of layers, first shortcut needs to be reshaped
     #filter, kernel, then stride
-    shortcut5 = tf.layers.conv2d(conv4, 2048, 1, 2, activation=tf.nn.relu)
-    conv5 = tf.layers.conv2d(conv4, 512, 1, 2, activation=tf.nn.relu) #need stride 2
-    conv5 = tf.layers.conv2d(conv5, 512, 3, activation=tf.nn.relu, padding = "same")
-    conv5 = tf.layers.conv2d(conv5, 2048, 1, activation=None, padding = "same")
+    shortcut5 = tf.layers.conv2d(conv4, 2048, 1, 2, activation=tf.nn.relu, kernel_regularizer=regularizer)
+    conv5 = tf.layers.conv2d(conv4, 512, 1, 2, activation=tf.nn.relu, kernel_regularizer=regularizer) #need stride 2
+    conv5 = tf.layers.conv2d(conv5, 512, 3, activation=tf.nn.relu, padding = "same", kernel_regularizer=regularizer)
+    conv5 = tf.layers.conv2d(conv5, 2048, 1, activation=None, padding = "same", kernel_regularizer=regularizer)
     conv5 = conv5 + shortcut5
     conv5 = tf.nn.relu(conv5)
     
@@ -155,9 +199,9 @@ def ResNet50(x):
     #fifth layer with shortcuts
     for i in range(2):
         #filters, then kernel size
-        conv5 = tf.layers.conv2d(conv5, 512, 1, activation=tf.nn.relu, padding = "same")
-        conv5 = tf.layers.conv2d(conv5, 512, 3, activation=tf.nn.relu, padding = "same")
-        conv5 = tf.layers.conv2d(conv5, 2048, 1, activation=None, padding = "same")
+        conv5 = tf.layers.conv2d(conv5, 512, 1, activation=tf.nn.relu, padding = "same", kernel_regularizer=regularizer)
+        conv5 = tf.layers.conv2d(conv5, 512, 3, activation=tf.nn.relu, padding = "same", kernel_regularizer=regularizer)
+        conv5 = tf.layers.conv2d(conv5, 2048, 1, activation=None, padding = "same", kernel_regularizer=regularizer)
         
         conv5 = shortcut5 + conv5
         conv5 = tf.nn.relu(conv5)
