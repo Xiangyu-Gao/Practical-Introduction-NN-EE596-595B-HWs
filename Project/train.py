@@ -49,8 +49,8 @@ ped5 = fetch_data("/mnt/disk1/temp/ee596prepro/2019_04_30_pm1s005/data", [0, 0, 
 #full_list = bike1 + bike2 + bike3 + car1 + car2 + car3 + ped1 + ped2 + ped3
 
 training_set = bike1 + car1  + ped1 + bike2 + car2 + ped2  + bike3 + car3 + ped3 +\
-            bike4 + car4  + ped4 + car5
-valid_set =  car6[-40:] + bike5[-40:]+ ped5[-40:]
+            bike4 + car4  + ped4 + car6
+valid_set =  car5[-40:] + bike5[-40:]+ ped5[-40:]
 #test_set = full_list[975:999]
 np.random.shuffle(training_set)
 np.random.shuffle(valid_set)
