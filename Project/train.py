@@ -48,10 +48,9 @@ ped5 = fetch_data("/mnt/disk1/temp/ee596prepro/2019_04_30_pm1s005/data", [0, 0, 
 
 #full_list = bike1 + bike2 + bike3 + car1 + car2 + car3 + ped1 + ped2 + ped3
 
-training_set = bike1 + car1  + ped1 + bike2 + car2 + ped2  + bike3[0:200] + car3[0:200]  + ped3[0:200] +\
-            bike4 + bike5 + car4 + car5 + car6 + ped4 + ped5 
-valid_set =  bike3[-20:] + car3[-20:]  + ped3[-20:] + bike3[-60:-40] + car3[-60:-40]  + ped3[-60:-40] + \
-bike3[-100:-80] + car3[-100:-80]  + ped3[-100:-80]
+training_set = bike1 + car1  + ped1 + bike2 + car2 + ped2  + bike3 + car3 + ped3 +\
+            bike4 + car4  + ped4 + car5
+valid_set =  car6[-40:] + bike5[-40:]+ ped5[-40:]
 #test_set = full_list[975:999]
 np.random.shuffle(training_set)
 np.random.shuffle(valid_set)
@@ -131,7 +130,7 @@ keep_prob = tf.placeholder(tf.float32, name='keep_prob')
 
 
 #predicted labels
-logits = VGG_like(X, keep_prob)
+logits = VGG16(X, keep_prob)
 
 #define loss
 loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits_v2(logits=logits,labels=Y),name='loss')
@@ -247,3 +246,4 @@ plt.plot(steps,acc_list,'--',lw=4)
 plt.ylabel('accuracy')
 plt.xlabel('epoch')
 plt.title('Epoch vs accuracy')
+plt.show()

@@ -28,11 +28,11 @@ num_classes = 3
 # directory = "Desktop/ee596prepro/2019_04_09_bms1000/data"
 
 
-bike3 = fetch_data("/mnt/disk1/temp/ee596prepro/2019_04_09_bms1002/data", [1, 0, 0])
-car3 = fetch_data("/mnt/disk1/temp/ee596prepro/2019_04_09_cms1002/data", [0, 1, 0])
-ped3 = fetch_data("/mnt/disk1/temp/ee596prepro/2019_04_09_pms2000/data", [0, 0, 1])
+car6 = fetch_data("/mnt/disk1/temp/ee596prepro/2019_05_09_cs1m001/data", [0, 1, 0])
+bike5 = fetch_data("/mnt/disk1/temp/ee596prepro/2019_04_30_bm1s006/data", [1, 0, 0])
+ped5 = fetch_data("/mnt/disk1/temp/ee596prepro/2019_04_30_pm1s005/data", [0, 0, 1])
 
-test_set = bike3[-100:] + car3[-100:] + ped3[-100:]
+test_set = car6 + bike5+ ped5
 
 np.random.shuffle(test_set)
 
@@ -81,7 +81,7 @@ keep_prob = tf.placeholder(tf.float32, name='keep_prob')
 
 
 # predicted labels
-logits = AlexNet(X, keep_prob)
+logits = VGG16(X, keep_prob)
 
 # define loss
 loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits_v2(logits=logits, labels=Y), name='loss')
