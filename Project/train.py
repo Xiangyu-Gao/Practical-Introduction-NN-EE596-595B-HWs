@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 import time
 
 from tensorflow.contrib.layers import flatten
-from networks import VGG_like, VGG16, ResNet50
+from networks import VGG_like, VGG16, ResNet50, AlexNet
 from utils import fetch_data, mini_batch
 from tqdm import tqdm
 
@@ -18,7 +18,7 @@ tf.reset_default_graph()
 #learning rate
 lr = 0.00001
 #number of traning steps
-num_steps = 40
+num_steps = 60
 #batch_size
 batch_size = 10
 #num_input = 784
@@ -27,27 +27,26 @@ num_classes = 3
 #fetch the data
 #directory = "Desktop/ee596prepro/2019_04_09_bms1000/data"
 
-bike1 = fetch_data("D:/tmp/ee596prepro/2019_04_09_bms1000/data", [1, 0, 0])
-bike2 = fetch_data("D:/tmp/ee596prepro/2019_04_09_bms1001/data", [1, 0, 0])
-bike3 = fetch_data("D:/tmp/ee596prepro/2019_04_09_bms1002/data", [1, 0, 0])
-bike4 = fetch_data("D:/tmp/ee596prepro/2019_04_30_bm1s005/data", [1, 0, 0])
-bike5 = fetch_data("D:/tmp/ee596prepro/2019_04_30_bm1s006/data", [1, 0, 0])
+bike1 = fetch_data("/mnt/disk1/temp/ee596prepro/2019_04_09_bms1000/data", [1, 0, 0])
+bike2 = fetch_data("/mnt/disk1/temp/ee596prepro/2019_04_09_bms1001/data", [1, 0, 0])
+bike3 = fetch_data("/mnt/disk1/temp/ee596prepro/2019_04_09_bms1002/data", [1, 0, 0])
+bike4 = fetch_data("/mnt/disk1/temp/ee596prepro/2019_04_30_bm1s005/data", [1, 0, 0])
+bike5 = fetch_data("/mnt/disk1/temp/ee596prepro/2019_04_30_bm1s006/data", [1, 0, 0])
 
-car1 = fetch_data("D:/tmp/ee596prepro/2019_04_09_cms1000/data", [0, 1, 0])
-car2 = fetch_data("D:/tmp/ee596prepro/2019_04_09_cms1001/data", [0, 1, 0])
-car3 = fetch_data("D:/tmp/ee596prepro/2019_04_09_cms1002/data", [0, 1, 0])
-car4 = fetch_data("D:/tmp/ee596prepro/2019_04_30_cm1s000/data", [0, 1, 0])
-car5 = fetch_data("D:/tmp/ee596prepro/2019_05_09_cm1s004/data", [0, 1, 0])
-car6 = fetch_data("D:/tmp/ee596prepro/2019_05_09_cs1m001/data", [0, 1, 0])
+car1 = fetch_data("/mnt/disk1/temp/ee596prepro/2019_04_09_cms1000/data", [0, 1, 0])
+car2 = fetch_data("/mnt/disk1/temp/ee596prepro/2019_04_09_cms1001/data", [0, 1, 0])
+car3 = fetch_data("/mnt/disk1/temp/ee596prepro/2019_04_09_cms1002/data", [0, 1, 0])
+car4 = fetch_data("/mnt/disk1/temp/ee596prepro/2019_04_30_cm1s000/data", [0, 1, 0])
+car5 = fetch_data("/mnt/disk1/temp/ee596prepro/2019_05_09_cm1s004/data", [0, 1, 0])
+car6 = fetch_data("/mnt/disk1/temp/ee596prepro/2019_05_09_cs1m001/data", [0, 1, 0])
 
-ped1 = fetch_data("D:/tmp/ee596prepro/2019_04_09_pms1000/data", [0, 0, 1])
-ped2 = fetch_data("D:/tmp/ee596prepro/2019_04_09_pms1001/data", [0, 0, 1])
-ped3 = fetch_data("D:/tmp/ee596prepro/2019_04_09_pms2000/data", [0, 0, 1])
-ped4 = fetch_data("D:/tmp/ee596prepro/2019_04_30_pm1s004/data", [0, 0, 1])
-ped5 = fetch_data("D:/tmp/ee596prepro/2019_04_30_pm1s005/data", [0, 0, 1])
+ped1 = fetch_data("/mnt/disk1/temp/ee596prepro/2019_04_09_pms1000/data", [0, 0, 1])
+ped2 = fetch_data("/mnt/disk1/temp/ee596prepro/2019_04_09_pms1001/data", [0, 0, 1])
+ped3 = fetch_data("/mnt/disk1/temp/ee596prepro/2019_04_09_pms2000/data", [0, 0, 1])
+ped4 = fetch_data("/mnt/disk1/temp/ee596prepro/2019_04_30_pm1s004/data", [0, 0, 1])
+ped5 = fetch_data("/mnt/disk1/temp/ee596prepro/2019_04_30_pm1s005/data", [0, 0, 1])
 
 #full_list = bike1 + bike2 + bike3 + car1 + car2 + car3 + ped1 + ped2 + ped3
-#full_list = 
 
 training_set = bike1 + car1  + ped1 + bike2 + car2 + ped2  + bike3[0:200] + car3[0:200]  + ped3[0:200] +\
             bike4 + bike5 + car4 + car5 + car6 + ped4 + ped5 
@@ -132,7 +131,7 @@ keep_prob = tf.placeholder(tf.float32, name='keep_prob')
 
 
 #predicted labels
-logits = VGG16(X, keep_prob)
+logits = VGG_like(X, keep_prob)
 
 #define loss
 loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits_v2(logits=logits,labels=Y),name='loss')
@@ -156,10 +155,11 @@ def get_session():
     """Create a session that dynamically allocates memory."""
     # See: https://www.tensorflow.org/tutorials/using_gpu#allowing_gpu_memory_growth
     config = tf.ConfigProto()
-    #config.gpu_options.allow_growth = True
-    #config.gpu_options.allocator_type ='BFC'
-    #config.gpu_options.per_process_gpu_memory_fraction = 0.90
+    config.gpu_options.allow_growth = True
+    config.gpu_options.allocator_type ='BFC'
+    config.gpu_options.per_process_gpu_memory_fraction = 0.90
     session = tf.Session(config=config)
+    # session = tf.Session()
     return session
 sess = get_session()
 
@@ -210,7 +210,7 @@ for i in range(num_steps):
 
     print("--- %s seconds ---" % (time.time() - start_time))
 
-saver.save(sess, 'C:/Users/Xiangyu Gao/Documents/GitHub/Practical-Introduction-NN-hw/Project/model/VGG_model_30.ckpt')
+saver.save(sess, '/home/admin-cmmb/Documents/Practical-Introduction-NN-hw-master/model')
 print("Training finished!")
 
 # acc = 0
