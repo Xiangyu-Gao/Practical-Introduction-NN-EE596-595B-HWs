@@ -28,11 +28,11 @@ num_classes = 3
 # directory = "Desktop/ee596prepro/2019_04_09_bms1000/data"
 
 
-car6 = fetch_data("/mnt/disk1/temp/ee596prepro/2019_05_09_cs1m001/data", [0, 1, 0])
+car5 = fetch_data("/mnt/disk1/temp/ee596prepro/2019_05_09_cm1s004/data", [0, 1, 0])
 bike5 = fetch_data("/mnt/disk1/temp/ee596prepro/2019_04_30_bm1s006/data", [1, 0, 0])
 ped5 = fetch_data("/mnt/disk1/temp/ee596prepro/2019_04_30_pm1s005/data", [0, 0, 1])
 
-test_set = car6 + bike5+ ped5
+test_set = car5[150:]
 
 np.random.shuffle(test_set)
 

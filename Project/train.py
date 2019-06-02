@@ -47,11 +47,21 @@ ped4 = fetch_data("/mnt/disk1/temp/ee596prepro/2019_04_30_pm1s004/data", [0, 0, 
 ped5 = fetch_data("/mnt/disk1/temp/ee596prepro/2019_04_30_pm1s005/data", [0, 0, 1])
 
 #full_list = bike1 + bike2 + bike3 + car1 + car2 + car3 + ped1 + ped2 + ped3
+test_ratio = 0.8
+training_set = bike1[0:int(len(bike1)*test_ratio)] + car1[0:int(len(car1)*test_ratio)] + ped1[0:int(len(ped1)*test_ratio)] +\
+               bike2[0:int(len(bike2)*test_ratio)] + car2[0:int(len(car2)*test_ratio)] + ped2[0:int(len(ped2)*test_ratio)] +\
+               bike3[0:int(len(bike3)*test_ratio)] + car3[0:int(len(car3)*test_ratio)] + ped3[0:int(len(ped3)*test_ratio)] +\
+               bike4[0:int(len(bike4)*test_ratio)] + car4[0:int(len(car4)*test_ratio)] + ped4[0:int(len(ped4)*test_ratio)] +\
+               bike5[0:int(len(bike5)*test_ratio)] + car5[0:int(len(car5)*test_ratio)] + ped5[0:int(len(ped5)*test_ratio)] +\
+               car6[0:int(len(car6)*test_ratio)]
 
-training_set = bike1 + car1  + ped1 + bike2 + car2 + ped2  + bike3 + car3 + ped3 +\
-            bike4 + car4  + ped4 + car6
-valid_set =  car5[-40:] + bike5[-40:]+ ped5[-40:]
-#test_set = full_list[975:999]
+valid_set = bike1[int(len(bike1)*test_ratio):] + car1[int(len(car1)*test_ratio):] + ped1[int(len(ped1)*test_ratio):] +\
+               bike2[int(len(bike2)*test_ratio):] + car2[int(len(car2)*test_ratio):] + ped2[int(len(ped2)*test_ratio):] +\
+               bike3[int(len(bike3)*test_ratio):] + car3[int(len(car3)*test_ratio):] + ped3[int(len(ped3)*test_ratio):] +\
+               bike4[int(len(bike4)*test_ratio):] + car4[int(len(car4)*test_ratio):] + ped4[int(len(ped4)*test_ratio):] +\
+               bike5[int(len(bike5)*test_ratio):] + car5[int(len(car5)*test_ratio):] + ped5[int(len(ped5)*test_ratio):] +\
+               car6[int(len(car6)*test_ratio):]
+
 np.random.shuffle(training_set)
 np.random.shuffle(valid_set)
 
@@ -130,7 +140,7 @@ keep_prob = tf.placeholder(tf.float32, name='keep_prob')
 
 
 #predicted labels
-logits = VGG16(X, keep_prob)
+logits = AlexNet(X, keep_prob)
 
 #define loss
 loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits_v2(logits=logits,labels=Y),name='loss')
