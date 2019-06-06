@@ -140,18 +140,18 @@ keep_prob = tf.placeholder(tf.float32, name='keep_prob')
 
 
 #predicted labels
-logits = AlexNet(X, keep_prob)
+logits = VGG16(X, keep_prob)
 
 #define loss
 loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits_v2(logits=logits,labels=Y),name='loss')
 l2_loss = tf.losses.get_regularization_loss()
 loss += l2_loss
+
 #define optimizer
 #optimizer = tf.train.GradientDescentOptimizer(learning_rate=lr)
 optimizer = tf.train.AdamOptimizer(learning_rate=lr)
 train_op = optimizer.minimize(loss)
-#optimizer = tf.train.AdamOptimizer()
-#train_op = optimizer.minimize(loss)
+
 
 #compare the predicted labels with true labels
 correct_pred = tf.equal(tf.argmax(logits,1),tf.argmax(Y,1))
@@ -172,48 +172,54 @@ def get_session():
     return session
 sess = get_session()
 
-#Initialize the variables
+# Initialize the variables
 init = tf.global_variables_initializer()
-#Save model
+# Save model
 saver = tf.train.Saver()
 acc_list = []
+acc_t_list = []
+loss_list = []
 steps = []
 
-#with tf.Session() as sess:
+# with tf.Session() as sess:
 sess.run(init)
 
 for i in range(num_steps):
     start_time = time.time()
-    #epoch training
+    # epoch training
     acc_t = 0
+    loss_final = 0
     for j in range(len(train_set_data)):
-        #fetch batch
+        # fetch batch
         batch_x = train_set_data[j]
-        #print("running")
+        # print("running")
         batch_y = train_set_labels[j]
-        #run optimization
-        sess.run(train_op, feed_dict={X:batch_x, Y:batch_y, keep_prob:0.5})
-        loss1 = sess.run(loss, feed_dict={X:batch_x, Y:batch_y, keep_prob:1})
-        acc1 = sess.run(accuracy, feed_dict={X:batch_x, Y:batch_y, keep_prob:1})
-        #print('[%d, %d] loss: %.7f accuracy: %.7f' % (i, j, loss1, acc1))
+        # run optimization
+        sess.run(train_op, feed_dict={X: batch_x, Y: batch_y, keep_prob: 0.5})
+        loss1 = sess.run(loss, feed_dict={X: batch_x, Y: batch_y, keep_prob: 1})
+        acc1 = sess.run(accuracy, feed_dict={X: batch_x, Y: batch_y, keep_prob: 1})
+        print('[%d, %d] loss: %.7f accuracy: %.7f' % (i, j, loss1, acc1))
 
         acc_t += acc1
+        loss_final = loss1
 
     print('[%d, %d] loss: %.7f accuracy: %.7f' % (i, j, loss1, acc1))
-    acc_t = acc_t/len(train_set_data)
-    print("step "+str(i)+", Accuracy training= {:.3f}".format(acc_t))
+    acc_t = acc_t / len(train_set_data)
+    acc_t_list.append(acc_t_list)
+    loss_list.append(loss_final)
+    print("step " + str(i) + ", Accuracy training= {:.3f}".format(acc_t))
 
-    #epoch validation
+    # epoch validation
     acc = 0
     for j in range(len(valid_set_data)):
-        #fetch batch
+        # fetch batch
         batch_x = valid_set_data[j]
         batch_y = valid_set_labels[j]
-        #run optimization
-        acc += sess.run(accuracy, feed_dict={X:batch_x, Y:batch_y, keep_prob:1})
+        # run optimization
+        acc += sess.run(accuracy, feed_dict={X: batch_x, Y: batch_y, keep_prob: 1})
 
-    acc = acc/len(valid_set_data)
-    print("step "+str(i)+", Accuracy validation= {:.3f}".format(acc))
+    acc = acc / len(valid_set_data)
+    print("step " + str(i) + ", Accuracy validation= {:.3f}".format(acc))
     acc_list.append(acc)
     steps.append(i)
 
@@ -229,7 +235,6 @@ print("Training finished!")
 #     batch_y = test_set_labels[k]
 #     #run optimization
 #     acc += sess.run(accuracy, feed_dict={X:batch_x, Y:batch_y})
-
 
 
 # acc = acc/len(test_set_data)
@@ -249,11 +254,27 @@ print("Training finished!")
 #     plt.imshow(frame_rgb)
 #     print("Guess:", guesses[images])
 #     plt.show()
-    
+
 plt.figure()
 # plot epoch vs accuracy
-plt.plot(steps,acc_list,'--',lw=4)
+plt.plot(steps, acc_list, '--', lw=4)
 plt.ylabel('accuracy')
 plt.xlabel('epoch')
-plt.title('Epoch vs accuracy')
+plt.title('Epoch vs Testing Accuracy')
+plt.show()
+
+plt.figure()
+# plot epoch vs accuracy
+plt.plot(steps, acc_t_list, '--', lw=4)
+plt.ylabel('accuracy')
+plt.xlabel('epoch')
+plt.title('Epoch vs Training Accuracy')
+plt.show()
+
+plt.figure()
+# plot epoch vs loss
+plt.plot(steps, loss_list, '--', lw=4)
+plt.ylabel('loss')
+plt.xlabel('epoch')
+plt.title('Epoch vs Loss')
 plt.show()
