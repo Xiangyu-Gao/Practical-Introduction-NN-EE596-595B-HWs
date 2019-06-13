@@ -1,6 +1,8 @@
 import tensorflow as tf
 import numpy as np
 from tensorflow.contrib.layers import flatten
+from tensorflow.keras import metrics
+from tensorflow.keras.callbacks import ModelCheckpoint
 
 num_classes = 3
 
@@ -263,3 +265,6 @@ def LeNet(x, keep_prob):
     full2 = tf.contrib.layers.fully_connected(inputs=full1, num_outputs=84, activation_fn=tf.nn.relu)
     logits = tf.contrib.layers.fully_connected(inputs=full2, num_outputs=num_classes, activation_fn=None)
     return logits
+
+
+

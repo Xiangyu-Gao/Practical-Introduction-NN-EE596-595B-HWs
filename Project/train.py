@@ -5,6 +5,8 @@ import timeit
 import scipy.io as spio
 import os
 import cv2
+import matplotlib
+matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
 import time
 
@@ -140,7 +142,7 @@ keep_prob = tf.placeholder(tf.float32, name='keep_prob')
 
 
 #predicted labels
-logits = VGG16(X, keep_prob)
+logits = ResNet50(X, keep_prob)
 
 #define loss
 loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits_v2(logits=logits,labels=Y),name='loss')
@@ -205,7 +207,7 @@ for i in range(num_steps):
 
     print('[%d, %d] loss: %.7f accuracy: %.7f' % (i, j, loss1, acc1))
     acc_t = acc_t / len(train_set_data)
-    acc_t_list.append(acc_t_list)
+    acc_t_list.append(acc_t)
     loss_list.append(loss_final)
     print("step " + str(i) + ", Accuracy training= {:.3f}".format(acc_t))
 
@@ -255,26 +257,33 @@ print("Training finished!")
 #     print("Guess:", guesses[images])
 #     plt.show()
 
-plt.figure()
+fig1 = plt.figure()
 # plot epoch vs accuracy
 plt.plot(steps, acc_list, '--', lw=4)
 plt.ylabel('accuracy')
 plt.xlabel('epoch')
 plt.title('Epoch vs Testing Accuracy')
-plt.show()
+#plt.show()
+fig1.savefig('testing accuracy.png')
+plt.close()
 
-plt.figure()
+fig2 = plt.figure()
 # plot epoch vs accuracy
 plt.plot(steps, acc_t_list, '--', lw=4)
 plt.ylabel('accuracy')
 plt.xlabel('epoch')
 plt.title('Epoch vs Training Accuracy')
-plt.show()
+#plt.show()
+fig2.savefig('training accuracy.png')
+plt.close()
 
-plt.figure()
+fig3 = plt.figure()
 # plot epoch vs loss
 plt.plot(steps, loss_list, '--', lw=4)
 plt.ylabel('loss')
 plt.xlabel('epoch')
 plt.title('Epoch vs Loss')
-plt.show()
+#plt.show()
+fig3.savefig('loss.png')
+plt.close()
+

@@ -28,11 +28,34 @@ num_classes = 3
 # directory = "Desktop/ee596prepro/2019_04_09_bms1000/data"
 
 
-car5 = fetch_data("/mnt/disk1/temp/ee596prepro/2019_05_09_cm1s004/data", [0, 1, 0])
+bike1 = fetch_data("/mnt/disk1/temp/ee596prepro/2019_04_09_bms1000/data", [1, 0, 0])
+bike2 = fetch_data("/mnt/disk1/temp/ee596prepro/2019_04_09_bms1001/data", [1, 0, 0])
+bike3 = fetch_data("/mnt/disk1/temp/ee596prepro/2019_04_09_bms1002/data", [1, 0, 0])
+bike4 = fetch_data("/mnt/disk1/temp/ee596prepro/2019_04_30_bm1s005/data", [1, 0, 0])
 bike5 = fetch_data("/mnt/disk1/temp/ee596prepro/2019_04_30_bm1s006/data", [1, 0, 0])
+
+car1 = fetch_data("/mnt/disk1/temp/ee596prepro/2019_04_09_cms1000/data", [0, 1, 0])
+car2 = fetch_data("/mnt/disk1/temp/ee596prepro/2019_04_09_cms1001/data", [0, 1, 0])
+car3 = fetch_data("/mnt/disk1/temp/ee596prepro/2019_04_09_cms1002/data", [0, 1, 0])
+car4 = fetch_data("/mnt/disk1/temp/ee596prepro/2019_04_30_cm1s000/data", [0, 1, 0])
+car5 = fetch_data("/mnt/disk1/temp/ee596prepro/2019_05_09_cm1s004/data", [0, 1, 0])
+car6 = fetch_data("/mnt/disk1/temp/ee596prepro/2019_05_09_cs1m001/data", [0, 1, 0])
+
+ped1 = fetch_data("/mnt/disk1/temp/ee596prepro/2019_04_09_pms1000/data", [0, 0, 1])
+ped2 = fetch_data("/mnt/disk1/temp/ee596prepro/2019_04_09_pms1001/data", [0, 0, 1])
+ped3 = fetch_data("/mnt/disk1/temp/ee596prepro/2019_04_09_pms2000/data", [0, 0, 1])
+ped4 = fetch_data("/mnt/disk1/temp/ee596prepro/2019_04_30_pm1s004/data", [0, 0, 1])
 ped5 = fetch_data("/mnt/disk1/temp/ee596prepro/2019_04_30_pm1s005/data", [0, 0, 1])
 
-test_set = car5[150:]
+#full_list = bike1 + bike2 + bike3 + car1 + car2 + car3 + ped1 + ped2 + ped3
+test_ratio = 0.8
+test_set = bike1[int(len(bike1)*test_ratio):] + car1[int(len(car1)*test_ratio):] + ped1[int(len(ped1)*test_ratio):] +\
+               bike2[int(len(bike2)*test_ratio):] + car2[int(len(car2)*test_ratio):] + ped2[int(len(ped2)*test_ratio):] +\
+               bike3[int(len(bike3)*test_ratio):] + car3[int(len(car3)*test_ratio):] + ped3[int(len(ped3)*test_ratio):] +\
+               bike4[int(len(bike4)*test_ratio):] + car4[int(len(car4)*test_ratio):] + ped4[int(len(ped4)*test_ratio):] +\
+               bike5[int(len(bike5)*test_ratio):] + car5[int(len(car5)*test_ratio):] + ped5[int(len(ped5)*test_ratio):] +\
+               car6[int(len(car6)*test_ratio):]
+
 
 np.random.shuffle(test_set)
 
@@ -68,9 +91,22 @@ print('the batch number of testing set is ', len(test_set_data))
 
 test_set = None
 
+bike1 = None
+car1 = None
+ped1 = None
+bike2 = None
+car2 = None
+ped2 = None
 bike3 = None
 car3 = None
 ped3 = None
+bike4 = None
+bike5 = None
+car4 = None 
+car5 = None
+car6 = None
+ped4 = None
+ped5 = None
 
 # tf graph input
 X = tf.placeholder(tf.float32, [None, 256, 256, 4], name='X')
@@ -91,8 +127,7 @@ loss += l2_loss
 # optimizer = tf.train.GradientDescentOptimizer(learning_rate=lr)
 optimizer = tf.train.AdamOptimizer(learning_rate=lr)
 train_op = optimizer.minimize(loss)
-# optimizer = tf.train.AdamOptimizer()
-# train_op = optimizer.minimize(loss)
+
 
 # compare the predicted labels with true labels
 correct_pred = tf.equal(tf.argmax(logits, 1), tf.argmax(Y, 1))
@@ -126,7 +161,7 @@ steps = []
 # with tf.Session() as sess:
 #sess.run(init)
 # restore weights
-weights_path = '/home/admin-cmmb/Documents/Practical-Introduction-NN-hw-master/model'
+weights_path = '/home/admin-cmmb/Documents/Practical-Introduction-NN-hw-master/Project/model/VGG-16-60/model2/model'
 saver.restore(sess, weights_path)
 
 for i in range(num_steps):
@@ -173,7 +208,7 @@ for i in range(num_steps):
 
     print("--- %s seconds ---" % (time.time() - start_time))
 
-saver.save(sess, '/home/admin-cmmb/Documents/Practical-Introduction-NN-hw-master/model')
+# saver.save(sess, '/home/admin-cmmb/Documents/Practical-Introduction-NN-hw-master/model')
 print("Training finished!")
 
 # acc = 0
